@@ -2,7 +2,8 @@ FROM ubuntu:noble
 
 ENV KASMVNC_BUILD_OS ubuntu
 ENV KASMVNC_BUILD_OS_CODENAME noble
-ENV XORG_VER 21.1.12
+ENV XORG_VER 21.1.25
+ENV XORG_SHA256 fdb5ec9b4ab7371745b182b68c7054ed72fc4d13e185fc369cfc45e0c3a174e7
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN sed -i 's$Types: deb$Types: deb deb-src$' /etc/apt/sources.list.d/ubuntu.sources
