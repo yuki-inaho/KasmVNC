@@ -1,0 +1,42 @@
+name: Noble security build
+on:
+  push:
+    branches: [security/noble-2026-10]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Cache regression with address and leak sanitizers
+        run: |
+          cmake -S tests/enccache -B /tmp/enccache-build -DENABLE_ASAN=ON
+          cmake --build /tmp/enccache-build
+          ASAN_OPTIONS=detect_leaks=1 ctest --test-dir /tmp/enccache-build --output-on-failure
+      - name: Build Noble package
+        env:
+          KASMVNC_COMMIT_ID: ${{ github.sha }}
+        run: builder/build-package ubuntu noble
+      - name: Verify packaged server
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(find builder/build/noble -name '*.deb' ! -name '*dbgsym*')
+          test "${#packages[@]}" -eq 1
+          sudo apt-get update
+          sudo apt-get install -y "${packages[0]/#/.\/}"
+          Xvnc -version 2>&1 | tee /tmp/xvnc-version.txt
+          grep -F '12101025' /tmp/xvnc-version.txt
+          cd builder/build/noble
+          sha256sum ./*.deb > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kasmvnc-noble-${{ github.sha }}
+          path: |
+            builder/build/noble/*.deb
+            builder/build/noble/SHA256SUMS
+          if-no-files-found: error
