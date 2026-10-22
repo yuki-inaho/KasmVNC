@@ -20,6 +20,18 @@ jobs:
           cmake -S tests/enccache -B /tmp/enccache-build -DENABLE_ASAN=ON
           cmake --build /tmp/enccache-build
           ASAN_OPTIONS=detect_leaks=1 ctest --test-dir /tmp/enccache-build --output-on-failure
+      - name: Reuse checksum-verified official 1.5.0 web client
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --proto '=https' --proto-redir '=https' \
+            https://github.com/kasmtech/KasmVNC/releases/download/v1.5.0/kasmvncserver_noble_1.5.0_amd64.deb \
+            -o /tmp/upstream.deb
+          echo 'f599fe02e2175b9817b6165f74a5d2bebdc73118dde9181ba3410963bed7ae1e  /tmp/upstream.deb' | sha256sum --check
+          dpkg-deb -x /tmp/upstream.deb /tmp/upstream
+          test -f /tmp/upstream/usr/share/kasmvnc/www/vnc.html
+          mkdir -p builder/www
+          cp -a /tmp/upstream/usr/share/kasmvnc/www/. builder/www/
+          touch builder/www
       - name: Build Noble package
         env:
           KASMVNC_COMMIT_ID: ${{ github.sha }}
