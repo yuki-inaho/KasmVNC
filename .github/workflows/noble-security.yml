@@ -7,6 +7,8 @@ permissions:
   contents: read
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -54,3 +56,20 @@ jobs:
             builder/build/noble/*.deb
             builder/build/noble/SHA256SUMS
           if-no-files-found: error
+      - name: Publish versioned package for workspace image
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(find builder/build/noble -name '*.deb' ! -name '*dbgsym*')
+          test "${#packages[@]}" -eq 1
+          mkdir -p release-assets
+          cp "${packages[0]}" release-assets/kasmvncserver_noble_amd64.deb
+          cd release-assets
+          sha256sum kasmvncserver_noble_amd64.deb | tee SHA256SUMS
+          tag="v1.5.0-noble-${GITHUB_SHA:0:12}"
+          gh release create "$tag" --target "$GITHUB_SHA" --prerelease \
+            --title "Noble security build ${GITHUB_SHA:0:12}" \
+            --notes "KasmVNC 1.5.0 with PRs #372, #362 and #369; X.Org 21.1.25. Package build and sanitizer tests passed. Workspace runtime acceptance is tracked separately." \
+            kasmvncserver_noble_amd64.deb SHA256SUMS

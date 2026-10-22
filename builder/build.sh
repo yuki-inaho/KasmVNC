@@ -96,6 +96,10 @@ if [ ! -f "$TARBALL" ]; then
   mv "$TARBALL.part" "$TARBALL"
 fi
 
+if [[ -n "${XORG_SHA256:-}" ]]; then
+  printf '%s  %s\n' "$XORG_SHA256" "$TARBALL" | sha256sum --check -
+fi
+
 #git clone https://kasmweb@bitbucket.org/kasmtech/kasmvnc.git
 #cd kasmvnc
 #git checkout dynjpeg
