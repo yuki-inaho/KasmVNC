@@ -1,3 +1,11 @@
+kasmvnc (1.5.2+git20261028-1) unstable; urgency=medium
+
+  * Build from the development master containing the upstream PR #2 merge.
+  * Retain the Noble X.Org security refresh and compiler hardening.
+  * Package the client built from the pinned upstream kasmweb commit.
+
+ -- yuki-inaho <yuki-inaho@users.noreply.github.com>  Wed, 28 Oct 2026 15:00:00 +0900
+
 kasmvnc (1.5.1-1) unstable; urgency=medium
 
   * Fixed Kasm Workspaces sessions failing to recover from unexpected connection drops. The web client now reconnects in place with bounded retries while preserving idle-timeout tracking.

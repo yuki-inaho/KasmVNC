@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+source "$(dirname "$0")/fetch-source.sh"
 
 build_and_install() {
     cmake -S . -B build -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=OFF -DFMT_TEST=OFF -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$HOME/.local -GNinja
     ninja -C build install
 }
@@ -17,9 +18,8 @@ prepare_source() {
 
     FMT_RELEASE="${FMT_RELEASE:-12.2.0}"
 
-    curl -Ls "https://github.com/fmtlib/fmt/archive/${FMT_RELEASE}.tar.gz" | \
-
-    tar xzvf - -C ${DIR}/ --strip-components=1
+    fetch_source fmt "$FMT_RELEASE" "https://github.com/fmtlib/fmt/archive/${FMT_RELEASE}.tar.gz" /tmp/fmt-source.tar.gz
+    tar xzf /tmp/fmt-source.tar.gz -C "${DIR}/" --strip-components=1
     cd ${DIR}
 }
 

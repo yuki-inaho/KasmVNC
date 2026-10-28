@@ -8,14 +8,12 @@ LIBYUV_SRC_DIR="/tmp/libyuv"
 prepare_source() {
   [ -d "$LIBYUV_SRC_DIR" ] && rm -rf "$LIBYUV_SRC_DIR"
 
-  LIBYUV_BRANCH="${LIBYUV_BRANCH:-stable}"
-  git clone \
-    --branch "$LIBYUV_BRANCH" \
-    --depth 1 \
-    "$LIBYUV_REPO" \
-    "$LIBYUV_SRC_DIR"
-
+  # Pin the reviewed stable revision; a moving branch can change a rebuild.
+  git init "$LIBYUV_SRC_DIR"
   cd "$LIBYUV_SRC_DIR"
+  git remote add origin "$LIBYUV_REPO"
+  git fetch --depth 1 origin eb6e7bb63738e29efd82ea3cf2a115238a89fa51
+  git checkout --detach FETCH_HEAD
 }
 
 build_and_install() {

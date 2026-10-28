@@ -1,4 +1,5 @@
 #!/bin/sh
+set -eu
 
 # clear previous build
 rm -rf /build/*

@@ -1,0 +1,21 @@
+{
+  "name": "kasmweb-build-dependencies",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@interactjs/actions": "^1.10.27",
+    "@interactjs/interact": "^1.10.27",
+    "@interactjs/pointer-events": "^1.10.27",
+    "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "core-js": "^3.18.3",
+    "pako": "^2.1.0",
+    "regenerator-runtime": "^0.13.9",
+    "vite": "^6.0.5",
+    "vite-plugin-env-compatible": "^2.0.1",
+    "vite-plugin-minify": "^2.1.0",
+    "vite-plugin-restart": "^0.4.2"
+  },
+  "overrides": {
+    "@originjs/vite-plugin-commonjs": {"esbuild": "0.25.12"}
+  }
+}

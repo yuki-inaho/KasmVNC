@@ -1,0 +1,110 @@
+name: Noble integration build
+on:
+  pull_request:
+  schedule:
+    - cron: '27 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish a commit-addressed prerelease after validation
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  build:
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Check out the pinned public web client
+        run: git submodule update --init kasmweb
+      - name: Audit locked public web build dependencies
+        run: |
+          python3 - <<'PY'
+          import importlib.util, json
+          spec = importlib.util.spec_from_file_location('audit', 'builder/audit-npm-dependencies.py')
+          audit = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(audit)
+          with open('builder/kasmweb-package-lock.json') as stream:
+              packages = audit.packages_from_lock(json.load(stream))
+          findings = audit.scan(packages)
+          for item in sorted(findings):
+              print(*item)
+          if findings:
+              raise SystemExit('Resolve or review OSV advisories before building')
+          print(f'Checked {len(packages)} package versions; no OSV advisories')
+          embedded = [('libjpeg-turbo', '3.2.1'), ('libwebp', '1.6.0')]
+          results = audit.query_osv([
+              {'package': {'ecosystem': 'OSS-Fuzz', 'name': name}, 'version': version}
+              for name, version in embedded
+          ])
+          if len(results) != len(embedded) or any(r.get('vulns') or r.get('next_page_token') for r in results):
+              raise SystemExit('Embedded library OSV results require review')
+          print('No matching OSV advisories for the checked embedded library versions')
+          PY
+      - name: Test cache regression with sanitizers
+        run: |
+          docker run --rm -v "$PWD:/src:ro" ubuntu:24.04 bash -ec '
+            apt-get update && apt-get install -y --no-install-recommends cmake g++ make
+            cmake -S /src/tests/enccache -B /tmp/enccache-build -DENABLE_ASAN=ON
+            cmake --build /tmp/enccache-build
+            ASAN_OPTIONS=detect_leaks=1 ctest --test-dir /tmp/enccache-build --output-on-failure
+          '
+      - name: Reject modified or unreviewed Noble build inputs
+        run: |
+          docker run --rm --network none -v "$PWD/builder/scripts:/scripts:ro" ubuntu:24.04 bash -ec '
+            source /scripts/fetch-source.sh
+            KASMVNC_BUILD_OS_CODENAME=noble
+            curl() { printf tampered > /tmp/archive; }
+            if fetch_source fmt 12.2.0 https://example.invalid /tmp/archive; then exit 1; fi
+            if fetch_source fmt unreviewed https://example.invalid /tmp/archive; then exit 1; fi
+          '
+      - name: Build Noble package and pinned web client
+        env:
+          KASMVNC_COMMIT_ID: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: builder/build-package ubuntu noble
+      - name: Verify packaged server
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(find builder/build/ubuntu_noble -name '*.deb' ! -name '*dbgsym*')
+          test "${#packages[@]}" -eq 1
+          test "$(dpkg-deb -f "${packages[0]}" Version)" = '1.5.2+git20261028-1'
+          sudo apt-get update
+          sudo apt-get install -y "${packages[0]/#/.\/}"
+          Xvnc -version 2>&1 | tee /tmp/xvnc-version.txt
+          grep -F '12101025' /tmp/xvnc-version.txt
+          strings /usr/bin/Xkasmvnc | grep -F 'libjpeg-turbo version 3.2.1'
+          test -f /usr/share/kasmvnc/www/vnc.html
+          cd builder/build/ubuntu_noble
+          sha256sum ./*.deb > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: kasmvnc-noble-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            builder/build/ubuntu_noble/*.deb
+            builder/build/ubuntu_noble/SHA256SUMS
+          if-no-files-found: error
+      - name: Publish versioned package
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(find builder/build/ubuntu_noble -name '*.deb' ! -name '*dbgsym*')
+          test "${#packages[@]}" -eq 1
+          mkdir -p release-assets
+          cp "${packages[0]}" release-assets/kasmvncserver_noble_amd64.deb
+          cd release-assets
+          sha256sum kasmvncserver_noble_amd64.deb > SHA256SUMS
+          tag="v1.5.2-noble-master-${GITHUB_SHA:0:12}"
+          gh release create "$tag" --target "$GITHUB_SHA" --prerelease \
+            --title "Noble master integration ${GITHUB_SHA:0:12}" \
+            --notes "Development master with the PR #2 merge, X.Org 21.1.25 and the pinned web client. The package version is a fork revision, not an official 1.5.2 release." \
+            kasmvncserver_noble_amd64.deb SHA256SUMS
