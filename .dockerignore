@@ -1,5 +1,8 @@
 builder/build/.sccache
 build/
+.git
+**/.git
+**/node_modules
 
 # In-source CMake build artifacts. builder/build.sh configures in-source
 # (`cd /src && cmake .`), so a local dev build leaves these in the working

@@ -838,7 +838,7 @@ std::vector<SessionInfo> VNCServerST::getSessionUsers() {
     if (!client->authenticated()) {
       continue;
     }
-    users.push_back(SessionInfo(client->getUsername(),client->getConnectionTime()));
+    users.push_back(SessionInfo(client->getUsername(), client->getConnectionTime(), client->is_owner()));
   }
   return users;
 }

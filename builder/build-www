@@ -14,20 +14,10 @@ build_www_dir() {
     kasmweb/www:latest
 }
 
-www_source_not_changed() {
-  [[ "$src_www" -ot "$built_www" ]]
-}
-
 cd "$(dirname "$0")/.."
 . builder/scripts/output_owner.sh
 
-src_www=kasmweb
 built_www=$PWD/builder/www
-
-if www_source_not_changed; then
-  echo "Source for www (kasmweb) did not change, doing nothing."
-  exit
-fi
 
 echo "Building www..."
 build_www_dir

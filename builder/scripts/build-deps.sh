@@ -11,7 +11,6 @@ if grep -q 'Ubuntu 20.04\|Debian GNU/Linux 11' /etc/os-release 2>/dev/null; then
 else
     export TBB_RELEASE="${TBB_RELEASE:-v2023.0.0}"
 fi
-export LIBYUV_BRANCH="${LIBYUV_BRANCH:-stable}"
 
 source_dir=$(dirname "$0")
 echo ">> Building libjpeg-turbo..."

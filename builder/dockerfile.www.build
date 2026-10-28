@@ -16,6 +16,10 @@ WORKDIR /src/www
 
 USER $OUTPUT_OWNER_UID
 
-RUN npm install
+RUN mv package.json package.upstream.json
+COPY --chown=$OUTPUT_OWNER_UID builder/kasmweb-package.json /src/www/package.json
+COPY --chown=$OUTPUT_OWNER_UID builder/kasmweb-package-lock.json /src/www/package-lock.json
+RUN npm ci --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org/ && \
+    mv package.upstream.json package.json
 
 ENTRYPOINT [ "/src/build-www-inside-docker" ]
