@@ -3,7 +3,7 @@
 set -euo pipefail
 source "$(dirname "$0")/fetch-source.sh"
 
-WEBP_VERSION="1.5.0"
+WEBP_VERSION="1.6.0"
 WEBP_TAR_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${WEBP_VERSION}.tar.gz"
 WEBP_TAR_FILE="/tmp/libwebp-${WEBP_VERSION}.tar.gz"
 WEBP_SRC_DIR="/tmp/libwebp-${WEBP_VERSION}"

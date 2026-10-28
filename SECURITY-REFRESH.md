@@ -18,7 +18,7 @@ package version sorts above the previous fork package to permit upgrades.
 - Noble's cpuid, fmt, oneTBB, libstatgrab and libwebp source archives are
   pinned by SHA-256. The hashes detect later changes to the downloaded archives;
   they are not an independent signature or proof of benign source code.
-- The server statically includes libjpeg-turbo 3.2.1 and libwebp 1.5.0. OSV
+- The server statically includes libjpeg-turbo 3.2.1 and libwebp 1.6.0. OSV
   flagged libjpeg-turbo 3.2.0 for OSV-2026-1068; 3.2.1 had no matching OSV
   advisory at this review. Rebuild and republish the server when these bundled
   libraries need fixes: updating the container's system packages alone does not

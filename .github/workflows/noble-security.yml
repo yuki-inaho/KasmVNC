@@ -39,7 +39,7 @@ jobs:
           if findings:
               raise SystemExit('Resolve or review OSV advisories before building')
           print(f'Checked {len(packages)} package versions; no OSV advisories')
-          embedded = [('libjpeg-turbo', '3.2.1'), ('libwebp', '1.5.0')]
+          embedded = [('libjpeg-turbo', '3.2.1'), ('libwebp', '1.6.0')]
           results = audit.query_osv([
               {'package': {'ecosystem': 'OSS-Fuzz', 'name': name}, 'version': version}
               for name, version in embedded

@@ -17,7 +17,7 @@ prepare_source() {
     [ -d ./${DIR} ] && rm -rf ./${DIR}
     mkdir ${DIR}
 
-    LIBCPUID_RELEASE="${LIBCPUID_RELEASE:-v0.8.1}"
+    LIBCPUID_RELEASE="${LIBCPUID_RELEASE:-v0.8.2}"
 
     fetch_source cpuid "$LIBCPUID_RELEASE" "https://github.com/anrieff/libcpuid/archive/${LIBCPUID_RELEASE}.tar.gz" /tmp/cpuid-source.tar.gz
     tar xzf /tmp/cpuid-source.tar.gz -C "${DIR}/" --strip-components=1

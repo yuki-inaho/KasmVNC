@@ -40,7 +40,7 @@ prepare_source() {
     if [ $older_release -eq 1 ]; then
         TBB_RELEASE="${TBB_RELEASE:-v2020.3.3}"
     else
-        TBB_RELEASE="${TBB_RELEASE:-v2023.0.0}"
+        TBB_RELEASE="${TBB_RELEASE:-v2023.1.0}"
     fi
 
     fetch_source tbb "$TBB_RELEASE" "https://github.com/uxlfoundation/oneTBB/archive/${TBB_RELEASE}.tar.gz" /tmp/tbb-source.tar.gz
