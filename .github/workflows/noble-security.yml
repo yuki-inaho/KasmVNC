@@ -40,7 +40,7 @@ jobs:
       - name: Test cache regression with sanitizers
         run: |
           docker run --rm -v "$PWD:/src:ro" ubuntu:24.04 bash -ec '
-            apt-get update && apt-get install -y --no-install-recommends cmake g++
+            apt-get update && apt-get install -y --no-install-recommends cmake g++ make
             cmake -S /src/tests/enccache -B /tmp/enccache-build -DENABLE_ASAN=ON
             cmake --build /tmp/enccache-build
             ASAN_OPTIONS=detect_leaks=1 ctest --test-dir /tmp/enccache-build --output-on-failure
