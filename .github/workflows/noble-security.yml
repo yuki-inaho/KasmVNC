@@ -1,6 +1,8 @@
 name: Noble integration build
 on:
   pull_request:
+  schedule:
+    - cron: '27 3 * * 1'
   workflow_dispatch:
     inputs:
       publish:
@@ -37,6 +39,14 @@ jobs:
           if findings:
               raise SystemExit('Resolve or review OSV advisories before building')
           print(f'Checked {len(packages)} package versions; no OSV advisories')
+          embedded = [('libjpeg-turbo', '3.2.1'), ('libwebp', '1.5.0')]
+          results = audit.query_osv([
+              {'package': {'ecosystem': 'OSS-Fuzz', 'name': name}, 'version': version}
+              for name, version in embedded
+          ])
+          if len(results) != len(embedded) or any(r.get('vulns') or r.get('next_page_token') for r in results):
+              raise SystemExit('Embedded library OSV results require review')
+          print('No matching OSV advisories for the checked embedded library versions')
           PY
       - name: Test cache regression with sanitizers
         run: |

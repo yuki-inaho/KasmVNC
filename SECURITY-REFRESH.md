@@ -15,6 +15,11 @@ package version sorts above the previous fork package to permit upgrades.
   lifecycle scripts and checks that lock against OSV. The libyuv source is
   pinned to a commit. Hashes and advisory checks do not establish that an
   upstream publisher or a source revision is free of malicious changes.
+- The server statically includes libjpeg-turbo 3.2.1 and libwebp 1.5.0. OSV
+  flagged libjpeg-turbo 3.2.0 for OSV-2026-1068; 3.2.1 had no matching OSV
+  advisory at this review. Rebuild and republish the server when these bundled
+  libraries need fixes: updating the container's system packages alone does not
+  replace code already linked into the server.
 
 The package still needs the workspace image's HTTPS, multi-viewer, keyboard,
 clipboard and GPU runtime acceptance before it is treated as a replacement.

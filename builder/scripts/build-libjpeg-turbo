@@ -10,11 +10,22 @@ build_and_install() {
 }
 
 prepare_libjpeg_source() {
-  JPEG_TURBO_RELEASE="${JPEG_TURBO_RELEASE:-3.2.0}"
+  JPEG_TURBO_RELEASE="${JPEG_TURBO_RELEASE:-3.2.1}"
   [ -d ./libjpeg-turbo ] && rm -rf ./libjpeg-turbo
   mkdir libjpeg-turbo
-  curl -Ls "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${JPEG_TURBO_RELEASE}.tar.gz" | \
-  tar xzvf - -C libjpeg-turbo/ --strip-components=1
+  if [[ "$JPEG_TURBO_RELEASE" == 3.2.1 ]]; then
+    curl --fail --location --retry 3 --proto '=https' --proto-redir '=https' \
+      "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.1/libjpeg-turbo-3.2.1.tar.gz" \
+      -o /tmp/libjpeg-turbo-3.2.1.tar.gz
+    printf '%s  %s\n' 'c27ad72a68da151177929aa969ae773a2da5ac2af9ce946079314fdac8cece7f' \
+      /tmp/libjpeg-turbo-3.2.1.tar.gz | sha256sum --check -
+    tar xzf /tmp/libjpeg-turbo-3.2.1.tar.gz -C libjpeg-turbo/ --strip-components=1
+  else
+    # Preserve the upstream override for non-Noble builds.
+    curl --fail --location --retry 3 --proto '=https' --proto-redir '=https' \
+      "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${JPEG_TURBO_RELEASE}.tar.gz" | \
+      tar xzf - -C libjpeg-turbo/ --strip-components=1
+  fi
   cd libjpeg-turbo
 }
 
