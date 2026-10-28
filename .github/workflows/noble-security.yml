@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Check out the pinned public web client
         run: git submodule update --init kasmweb
       - name: Audit locked public web build dependencies
@@ -47,7 +48,7 @@ jobs:
           '
       - name: Build Noble package and pinned web client
         env:
-          KASMVNC_COMMIT_ID: ${{ github.sha }}
+          KASMVNC_COMMIT_ID: ${{ github.event.pull_request.head.sha || github.sha }}
         run: builder/build-package ubuntu noble
       - name: Verify packaged server
         run: |
@@ -64,7 +65,7 @@ jobs:
           sha256sum ./*.deb > SHA256SUMS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: kasmvnc-noble-${{ github.sha }}
+          name: kasmvnc-noble-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             builder/build/ubuntu_noble/*.deb
             builder/build/ubuntu_noble/SHA256SUMS
