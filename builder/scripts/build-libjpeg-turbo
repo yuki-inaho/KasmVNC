@@ -23,6 +23,11 @@ prepare_libjpeg_source() {
       -o /tmp/libjpeg-turbo-3.2.1.tar.gz
     printf '%s  %s\n' 'c27ad72a68da151177929aa969ae773a2da5ac2af9ce946079314fdac8cece7f' \
       /tmp/libjpeg-turbo-3.2.1.tar.gz | sha256sum --check -
+    curl --fail --location --retry 3 --proto '=https' --proto-redir '=https' \
+      "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.1/libjpeg-turbo-3.2.1.tar.gz.sig" \
+      -o /tmp/libjpeg-turbo-3.2.1.tar.gz.sig
+    gpgv --keyring "$(dirname "$0")/libjpeg-release-key.gpg" \
+      /tmp/libjpeg-turbo-3.2.1.tar.gz.sig /tmp/libjpeg-turbo-3.2.1.tar.gz
     tar xzf /tmp/libjpeg-turbo-3.2.1.tar.gz -C libjpeg-turbo/ --strip-components=1
   else
     # Preserve the upstream override for non-Noble builds.

@@ -23,6 +23,9 @@ package version sorts above the previous fork package to permit upgrades.
   advisory at this review. Rebuild and republish the server when these bundled
   libraries need fixes: updating the container's system packages alone does not
   replace code already linked into the server.
+- The libjpeg-turbo source tarball is also checked with the upstream signing
+  key, fingerprint `0338C8D8D9FDA62CF9C421BD7EC2DBB6F4DBF434`. The fingerprint
+  is published in the project's [signature instructions](https://libjpeg-turbo.org/Downloads/DigitalSignatures).
 
 The package still needs the workspace image's HTTPS, multi-viewer, keyboard,
 clipboard and GPU runtime acceptance before it is treated as a replacement.
