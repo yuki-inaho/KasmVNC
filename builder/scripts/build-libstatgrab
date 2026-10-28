@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+source "$(dirname "$0")/fetch-source.sh"
 
 build_and_install() {
     ./autogen.sh
     CFLAGS="-fPIC" ./configure --prefix="$HOME/.local" --disable-shared --enable-static --disable-man
-    make -j$(nproc)
+    make -j"$(nproc)"
     make install
 }
 
@@ -17,9 +18,8 @@ prepare_source() {
 
     LIBSTATGRAB_RELEASE="${LIBSTATGRAB_RELEASE:-LIBSTATGRAB_0_92_1}"
 
-    curl -Ls "https://github.com/libstatgrab/libstatgrab/archive/${LIBSTATGRAB_RELEASE}.tar.gz" | \
-
-    tar xzvf - -C ${DIR}/ --strip-components=1
+    fetch_source statgrab "$LIBSTATGRAB_RELEASE" "https://github.com/libstatgrab/libstatgrab/archive/${LIBSTATGRAB_RELEASE}.tar.gz" /tmp/statgrab-source.tar.gz
+    tar xzf /tmp/statgrab-source.tar.gz -C "${DIR}/" --strip-components=1
     cd ${DIR}
 }
 

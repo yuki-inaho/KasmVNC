@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+source "$(dirname "$0")/fetch-source.sh"
 
 build_and_install() {
     if [ $older_release -eq 1 ]; then
@@ -42,8 +43,8 @@ prepare_source() {
         TBB_RELEASE="${TBB_RELEASE:-v2023.0.0}"
     fi
 
-    curl -Ls "https://github.com/uxlfoundation/oneTBB/archive/${TBB_RELEASE}.tar.gz" | \
-        tar xzvf - -C ${DIR}/ --strip-components=1
+    fetch_source tbb "$TBB_RELEASE" "https://github.com/uxlfoundation/oneTBB/archive/${TBB_RELEASE}.tar.gz" /tmp/tbb-source.tar.gz
+    tar xzf /tmp/tbb-source.tar.gz -C "${DIR}/" --strip-components=1
 
     cd ${DIR}
 }

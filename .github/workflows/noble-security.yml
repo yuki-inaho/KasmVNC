@@ -56,6 +56,15 @@ jobs:
             cmake --build /tmp/enccache-build
             ASAN_OPTIONS=detect_leaks=1 ctest --test-dir /tmp/enccache-build --output-on-failure
           '
+      - name: Reject modified or unreviewed Noble build inputs
+        run: |
+          docker run --rm --network none -v "$PWD/builder/scripts:/scripts:ro" ubuntu:24.04 bash -ec '
+            source /scripts/fetch-source.sh
+            KASMVNC_BUILD_OS_CODENAME=noble
+            curl() { printf tampered > /tmp/archive; }
+            if fetch_source fmt 12.2.0 https://example.invalid /tmp/archive; then exit 1; fi
+            if fetch_source fmt unreviewed https://example.invalid /tmp/archive; then exit 1; fi
+          '
       - name: Build Noble package and pinned web client
         env:
           KASMVNC_COMMIT_ID: ${{ github.event.pull_request.head.sha || github.sha }}

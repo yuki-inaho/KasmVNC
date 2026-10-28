@@ -11,6 +11,10 @@ build_and_install() {
 
 prepare_libjpeg_source() {
   JPEG_TURBO_RELEASE="${JPEG_TURBO_RELEASE:-3.2.1}"
+  if [[ "${KASMVNC_BUILD_OS_CODENAME:-}" == noble && "$JPEG_TURBO_RELEASE" != 3.2.1 ]]; then
+    echo "No reviewed digest for libjpeg-turbo $JPEG_TURBO_RELEASE" >&2
+    return 1
+  fi
   [ -d ./libjpeg-turbo ] && rm -rf ./libjpeg-turbo
   mkdir libjpeg-turbo
   if [[ "$JPEG_TURBO_RELEASE" == 3.2.1 ]]; then
